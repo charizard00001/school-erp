@@ -1,0 +1,151 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ───────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+}
+
+// ─── Core Models ─────────────────────────────────────
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  phone        String?
+  role         Role
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  student      Student?
+  teacher      Teacher?
+  attendances  Attendance[] @relation("MarkedBy")
+  chatMessages ChatMessage[]
+}
+
+model Class {
+  id           String   @id @default(cuid())
+  name         String   // e.g. "1", "2", ... "12"
+  section      String   // e.g. "A", "B", "C"
+  academicYear String   // e.g. "2025-2026"
+
+  students     Student[]
+  subjects     Subject[]
+  teacherClasses TeacherClass[]
+  attendances  Attendance[]
+  exams        Exam[]
+
+  @@unique([name, section, academicYear])
+}
+
+model Subject {
+  id      String @id @default(cuid())
+  name    String
+  classId String
+  class   Class  @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  teacherClasses TeacherClass[]
+  exams          Exam[]
+
+  @@unique([name, classId])
+}
+
+model Student {
+  id          String @id @default(cuid())
+  userId      String @unique
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  classId     String
+  class       Class  @relation(fields: [classId], references: [id])
+  rollNumber  String
+  parentName  String?
+  parentPhone String?
+
+  attendances Attendance[]
+  marks       Mark[]
+
+  @@unique([classId, rollNumber])
+}
+
+model Teacher {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  teacherClasses TeacherClass[]
+}
+
+model TeacherClass {
+  id        String  @id @default(cuid())
+  teacherId String
+  teacher   Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  classId   String
+  class     Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
+  subjectId String
+  subject   Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@unique([teacherId, classId, subjectId])
+}
+
+model Attendance {
+  id        String           @id @default(cuid())
+  studentId String
+  student   Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  classId   String
+  class     Class            @relation(fields: [classId], references: [id])
+  date      DateTime         @db.Date
+  status    AttendanceStatus
+  markedById String
+  markedBy  User             @relation("MarkedBy", fields: [markedById], references: [id])
+
+  @@unique([studentId, date])
+}
+
+model Exam {
+  id         String   @id @default(cuid())
+  name       String   // e.g. "Mid-Term", "Final"
+  classId    String
+  class      Class    @relation(fields: [classId], references: [id])
+  subjectId  String
+  subject    Subject  @relation(fields: [subjectId], references: [id])
+  date       DateTime @db.Date
+  totalMarks Int
+
+  marks Mark[]
+
+  @@unique([name, classId, subjectId])
+}
+
+model Mark {
+  id            String  @id @default(cuid())
+  studentId     String
+  student       Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  examId        String
+  exam          Exam    @relation(fields: [examId], references: [id], onDelete: Cascade)
+  marksObtained Int
+
+  @@unique([studentId, examId])
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      String   // "user" | "assistant"
+  content   String
+  createdAt DateTime @default(now())
+}

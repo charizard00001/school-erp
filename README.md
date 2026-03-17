@@ -1,36 +1,136 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# School ERP System
+
+A full-stack School ERP system with Admin, Teacher, and Student portals, featuring an AI-powered chatbot for reports and workflow automation.
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Framework | Next.js 16 (App Router) |
+| Language | TypeScript |
+| Database | PostgreSQL (Supabase) |
+| ORM | Prisma |
+| UI | Tailwind CSS + shadcn/ui |
+| Chatbot | Vercel AI SDK + Groq (Llama 3.3) |
+| Auth | JWT (jose) + bcryptjs |
+| Deployment | Vercel + Supabase |
+
+## Features
+
+### Admin Portal
+- Dashboard with overview stats (students, teachers, classes, attendance)
+- Student management (CRUD with search/filter)
+- Teacher management (CRUD + assign to classes/subjects)
+- Class & subject management (Classes 1-12 with sections)
+- Exam management
+
+### Teacher Portal
+- Dashboard with assigned classes overview
+- Mark attendance (per class, per date, toggle Present/Absent/Late)
+- Enter/edit marks for exams
+
+### Student Portal
+- Dashboard with attendance %, average score, recent results
+- Attendance history view
+- Marks/results table with pass/fail status
+
+### AI Chatbot (Admin & Teacher)
+- Natural language queries powered by Llama 3.3 via Groq
+- Tools: search students, attendance summaries, class performance analytics, report card generation, school statistics
+- Floating chat widget with streaming responses
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+- Node.js 18+
+- A Supabase project (free tier: [supabase.com](https://supabase.com))
+- A Groq API key (free tier: [console.groq.com](https://console.groq.com))
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### Setup
+
+1. **Clone the repo**
+   ```bash
+   git clone https://github.com/charizard00001/school-erp.git
+   cd school-erp
+   npm install
+   ```
+
+2. **Configure environment**
+   ```bash
+   cp .env.example .env
+   ```
+   Fill in your Supabase `DATABASE_URL`, `JWT_SECRET`, and `GROQ_API_KEY` in `.env`.
+
+3. **Setup database**
+   ```bash
+   npx prisma generate
+   npx prisma db push
+   npm run db:seed
+   ```
+
+4. **Run dev server**
+   ```bash
+   npm run dev
+   ```
+   Open [http://localhost:3000](http://localhost:3000)
+
+### Demo Credentials
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | admin@school.com | admin123 |
+| Teacher | teacher@school.com | teacher123 |
+| Student | student@school.com | student123 |
+
+## Project Structure
+
+```
+school-erp/
+├── prisma/
+│   ├── schema.prisma          # Database schema
+│   └── seed.ts                # Sample data seeder
+├── src/
+│   ├── app/
+│   │   ├── (dashboard)/       # Protected dashboard routes
+│   │   │   ├── admin/         # Admin portal pages
+│   │   │   ├── teacher/       # Teacher portal pages
+│   │   │   ├── student/       # Student portal pages
+│   │   │   └── layout.tsx     # Shared sidebar layout
+│   │   ├── api/
+│   │   │   ├── auth/          # Login/logout endpoints
+│   │   │   ├── chat/          # AI chatbot streaming endpoint
+│   │   │   ├── marks/         # Marks data API
+│   │   │   ├── reports/       # Report generation API
+│   │   │   └── students/      # Students data API
+│   │   ├── login/page.tsx     # Login page
+│   │   └── page.tsx           # Root redirect
+│   ├── components/
+│   │   ├── ui/                # shadcn/ui components
+│   │   ├── chat-widget.tsx    # AI chatbot widget
+│   │   └── sidebar.tsx        # Navigation sidebar
+│   ├── lib/
+│   │   ├── auth.ts            # JWT session management
+│   │   ├── chatbot-tools.ts   # AI tool definitions
+│   │   ├── prisma.ts          # Prisma client singleton
+│   │   └── utils.ts           # Utilities
+│   └── middleware.ts          # Route protection
+├── .env.example
+└── package.json
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Deployment
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Vercel
+1. Push to GitHub
+2. Import project in [vercel.com](https://vercel.com)
+3. Add environment variables (DATABASE_URL, JWT_SECRET, GROQ_API_KEY)
+4. Deploy
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Database
+Run migrations on your production Supabase database:
+```bash
+npx prisma db push
+```
 
-## Learn More
+## License
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT
