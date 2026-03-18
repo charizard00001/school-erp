@@ -7,6 +7,9 @@ import { randomUUID } from "crypto";
 const TIMEOUT_MS = 30_000;
 const MAX_OUTPUT = 50_000; // 50KB
 
+// Use python3 on Linux/Alpine, python on Windows
+const PYTHON_CMD = process.platform === "win32" ? "python" : "python3";
+
 function buildBootstrap(dbUrl: string): string {
   return `import psycopg2
 import psycopg2.extras
@@ -87,7 +90,7 @@ export async function executePython(code: string): Promise<SandboxResult> {
 
     return await new Promise<SandboxResult>((resolve) => {
       execFile(
-        "python",
+        PYTHON_CMD,
         [tmpFile],
         { timeout: TIMEOUT_MS, maxBuffer: 2 * 1024 * 1024 },
         (error, stdout, stderr) => {

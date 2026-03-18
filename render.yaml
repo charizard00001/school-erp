@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: school-erp
+    runtime: docker
+    repo: https://github.com/charizard00001/school-erp.git
+    branch: main
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
