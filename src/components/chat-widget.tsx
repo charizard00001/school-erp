@@ -5,7 +5,6 @@ import { useChat } from "@ai-sdk/react";
 import { TextStreamChatTransport } from "ai";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageCircle, X, Send, Bot, User, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -16,7 +15,7 @@ const transport = new TextStreamChatTransport({
 export function ChatWidget() {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
 
   const { messages, sendMessage, status } = useChat({
     transport,
@@ -25,9 +24,7 @@ export function ChatWidget() {
   const isLoading = status === "streaming" || status === "submitted";
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   function handleSubmit(e: React.FormEvent) {
@@ -67,7 +64,7 @@ export function ChatWidget() {
           </div>
 
           {/* Messages */}
-          <ScrollArea className="flex-1 p-4" ref={scrollRef}>
+          <div className="flex-1 overflow-y-auto p-4">
             <div className="space-y-4">
               {messages.length === 0 && (
                 <div className="text-center text-muted-foreground text-sm py-8">
@@ -130,8 +127,9 @@ export function ChatWidget() {
                   </div>
                 </div>
               )}
+              <div ref={bottomRef} />
             </div>
-          </ScrollArea>
+          </div>
 
           {/* Input */}
           <form onSubmit={handleSubmit} className="p-3 border-t">

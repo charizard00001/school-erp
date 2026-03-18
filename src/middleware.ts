@@ -3,12 +3,12 @@ import { jwtVerify } from "jose";
 
 const secret = new TextEncoder().encode(process.env.JWT_SECRET || "fallback-dev-secret");
 
-const publicPaths = ["/login", "/api/auth/login"];
+const publicPaths = ["/login", "/api/"];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Allow public paths and static files
+  // Allow public paths, API routes, and static files
   if (
     publicPaths.some((p) => pathname.startsWith(p)) ||
     pathname.startsWith("/_next") ||
